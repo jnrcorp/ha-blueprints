@@ -14,7 +14,7 @@ blueprint:
     **NOTE**: You can select any device and this script will not verify what you provide is accurate, but it will fail if the device is not compatible.
 
     **CHANGELOG:**
-      - 1.0: (2025-01-12)
+      - 1.0: (2025-01-13)
         - First official release
 
   domain: automation
