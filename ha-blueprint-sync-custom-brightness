@@ -13,9 +13,6 @@ blueprint:
 
     **NOTE**: You can select any device and this script will not verify what you provide is accurate, but it will fail if the device is not compatible.
 
-
-dimmer switch entity with a custom brightness attribute.
-
     **CHANGELOG:**
       - 1.0: (2025-01-12)
         - First official release
