@@ -85,6 +85,8 @@ actions:
     - variables:
         max_brightness: !input max_brightness_value
         set_light_brightness: "{{ trigger.to_state.attributes.brightness / 255 * max_brightness | round(0) }}"
+    - delay:
+        milliseconds: !input delay_miliseconds
     - action: zwave_js.set_value
       metadata: {}
       data:
@@ -92,5 +94,3 @@ actions:
         property: !input zwave_property
         value: "{{ set_light_brightness }}"
         entity_id: "{{ trigger.entity_id }}"
-    - delay:
-        milliseconds: !input delay_miliseconds
