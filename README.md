@@ -1,6 +1,6 @@
 [![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fraw.githubusercontent.com%2Fjnrcorp%2Fha-blueprints%2Fmain%2Fha-blueprint-sync-custom-brightness.yaml)
 
-**Sync Brightness to Z-Wave Attribute v1.0** 🔛
+**Sync Brightness to Z-Wave Attribute v1.0**
 
 This blueprint allows you to easily create/maintain an automation that links the state of multiple entities:
   - set the brightness of any Z-Wave dimmer switch entity, it will set the custom brightness z-wave attribute to that brightness.
