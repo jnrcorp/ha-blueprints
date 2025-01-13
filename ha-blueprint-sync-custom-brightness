@@ -51,6 +51,14 @@ blueprint:
           min: 0
           mode: box
       default: 18
+    max_brightness_value:
+      name: Maximum Brightness Value for the Z-Wave Property
+      description: This will probably be 99 or 100 depending on the device. Zooz devices seem to be 99 and Leviton seem to be 100.
+      selector:
+        number:
+          min: 0
+          mode: box
+      default: 99
 
 mode: single
 max_exceeded: silent
@@ -72,15 +80,17 @@ condition:
   - condition: template
     value_template: "{{ trigger.to_state.attributes.brightness != None }}"
 
-sequence:
-  - variables:
-      set_light_brightness: "{{ trigger.to_state.attributes.brightness / 255 * 99 | round(0) }}"
-  - action: zwave_js.set_value
-    metadata: {}
-    data:
-      command_class: !input zwave_command_class
-      property: !input zwave_property
-      value: "{{ set_light_brightness }}"
-      entity_id: "{{ trigger.entity_id }}"
-  - delay:
-      milliseconds: !input delay_miliseconds
+actions:
+  - sequence:
+    - variables:
+        max_brightness: !input max_brightness_value
+        set_light_brightness: "{{ trigger.to_state.attributes.brightness / 255 * max_brightness | round(0) }}"
+    - action: zwave_js.set_value
+      metadata: {}
+      data:
+        command_class: !input zwave_command_class
+        property: !input zwave_property
+        value: "{{ set_light_brightness }}"
+        entity_id: "{{ trigger.entity_id }}"
+    - delay:
+        milliseconds: !input delay_miliseconds
