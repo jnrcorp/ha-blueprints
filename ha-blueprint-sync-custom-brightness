@@ -4,12 +4,17 @@ blueprint:
 
     [![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fraw.githubusercontent.com%2Fjnrcorp%2Fha-blueprints-sync-custom-brightness%2Fmain%2Fha-blueprint-sync-custom-brightness.yaml)
 
-    **Sync Custom Brightness v1.0** 🔛
+    **Sync Brightness to Z-Wave Attribute v1.0** 🔛
 
     This blueprint allows you to easily create/maintain an automation that links the state of multiple entities:
-      - set the brightness of any zooz dimmer switch entity, it will set the custom brightness z-wave attribute to that brightness.
+      - set the brightness of any Z-Wave dimmer switch entity, it will set the custom brightness z-wave attribute to that brightness.
+        - For Zooz, this is Custom Brightness.
+        - For Leviton, this is Initial Brightness.
 
-    **NOTE**: You can select any zooz dimmer switch entity with a custom brightness attribute.
+    **NOTE**: You can select any device and this script will not verify what you provide is accurate, but it will fail if the device is not compatible.
+
+
+dimmer switch entity with a custom brightness attribute.
 
     **CHANGELOG:**
       - 1.0: (2025-01-12)
@@ -18,7 +23,7 @@ blueprint:
   domain: automation
   input:
     dimmer_switch_entity:
-      name: Zooz Dimmer Switch Entities
+      name: Z-Wave Dimmer Switch Entities
       description: Entities whose custom brightness attribute will be updated each time the brightness on the switch is updated.
       selector:
         entity:
@@ -33,6 +38,22 @@ blueprint:
           unit_of_measurement: miliseconds
           mode: box
       default: 200
+    zwave_command_class:
+      name: Z-Wave Command Class
+      description: For me, this has been 112 for both Leviton and Zooz switches.
+      selector:
+        number:
+          min: 0
+          mode: box
+      default: 112
+    zwave_property:
+      name: Z-Wave Property
+      description: You'll need to check your specific device to find which property # you are trying ot adjust. It should be in the specifications. Zooz ZEN72 and ZEN77 are 18 and Leviton DZ6HD is 5
+      selector:
+        number:
+          min: 0
+          mode: box
+      default: 18
 
 mode: single
 max_exceeded: silent
@@ -45,22 +66,24 @@ trigger:
     id: set_brightness
     entity_id: !input dimmer_switch_entity
     attribute: brightness
+  - platform: state
+    id: turn_on
+    entity_id: !input dimmer_switch_entity
+    to: "on"
 
 condition:
   - condition: template
-    value_template: "{{ trigger.to_state.context.id != this.context.id }}"
+    value_template: "{{ trigger.to_state.attributes.brightness != None }}"
 
-action:
-  - choose:
-      - conditions:
-          - condition: trigger
-            id: set_brightness
-        sequence:
-          - variables:
-              set_light_brightness: "{{ trigger.to_state.attributes.brightness }}"
-          - service: light.turn_on
-            data:
-              entity_id: "{{linked_entities | accept('eq', trigger.entity_id) | list }}"
-              brightness: "{{ set_light_brightness }}"
-          - delay:
-              milliseconds: !input delay_miliseconds
+sequence:
+  - variables:
+      set_light_brightness: "{{ trigger.to_state.attributes.brightness / 255 * 99 | round(0) }}"
+  - action: zwave_js.set_value
+    metadata: {}
+    data:
+      command_class: !input zwave_command_class
+      property: !input zwave_property
+      value: "{{ set_light_brightness }}"
+      entity_id: "{{ trigger.entity_id }}"
+  - delay:
+      milliseconds: !input delay_miliseconds
