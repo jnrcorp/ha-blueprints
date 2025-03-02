@@ -8,7 +8,7 @@ blueprint:
 
     This blueprint allows you to easily create/maintain an automation that links the state of multiple entities:
       - set the brightness of any Z-Wave dimmer switch entity, it will set the custom brightness z-wave attribute to that brightness.
-        - For Zooz, this is Custom Brightness.
+        - For Zooz, this is Physical Custom Brightness On & Basic Set Custom Brightness On.
         - For Leviton, this is Initial Brightness.
 
     **NOTE**: You can select any device and this script will not verify what you provide is accurate, but it will fail if the device is not compatible.
