@@ -18,3 +18,6 @@ My main use-case was for multiple light switches in the house controlling the sa
 
 **Source:**
 [![jnrcorp - ha-blueprints](https://img.shields.io/static/v1?label=jnrcorp&message=ha-blueprints&color=blue&logo=github)](https://github.com/jnrcorp/ha-blueprints/blob/main/linked-lights/ha-blueprint-linked-lights.yaml "Go to GitHub repo") [![stars - ha-blueprints](https://img.shields.io/github/stars/jnrcorp/ha-blueprints?style=social)](https://github.com/jnrcorp/ha-blueprints) [![forks - ha-blueprints](https://img.shields.io/github/forks/jnrcorp/ha-blueprints?style=social)](https://github.com/jnrcorp/ha-blueprints)
+
+**Support:**
+[![HA Community - Topic](https://img.shields.io/static/v1?label=HA+Community&message=Topic&color=2ea44f&logo=home-assistant)](https://community.home-assistant.io/t/linked-lights-keep-lights-in-sync/887934?u=jnrcorp)
