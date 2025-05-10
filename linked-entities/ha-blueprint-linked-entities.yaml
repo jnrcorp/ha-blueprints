@@ -4,7 +4,7 @@ blueprint:
 
     [![Open your Home Assistant instance and show the blueprint import dialog with a specific blueprint pre-filled.](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fraw.githubusercontent.com%2Falexdelprete%2Fha-blueprints%2Fmain%2Fha-blueprint-linked-entities.yaml)
 
-    **Linked Entities v1.3** 🔛
+    **Linked Entities v1.4** 🔛
 
     This blueprint allows you to easily create/maintain an automation that links the state of multiple entities:
       - turn ANY linked entity ON, it will turn ON ALL linked entities.
@@ -109,8 +109,8 @@ action:
         sequence:
           - variables:
               set_light_brightness: "{{ trigger.to_state.attributes.brightness }}"
-          - service: "homeassistant.turn_on"
-            target:
+          - service: light.turn_on
+            data:
               entity_id: "{{linked_entities | reject('eq', trigger.entity_id) | list }}"
               brightness: "{{ set_light_brightness }}"
           - delay:
@@ -119,8 +119,8 @@ action:
           - condition: trigger
             id: turn_off
         sequence:
-          - service: "homeassistant.turn_off"
-            target:
+          - service: "light.turn_off"
+            data:
               entity_id: "{{linked_entities | reject('eq', trigger.entity_id) | list }}"
           - delay:
               milliseconds: !input delay_miliseconds
