@@ -87,10 +87,12 @@ action:
         sequence:
           - variables:
               set_light_brightness: "{{ trigger.to_state.attributes.brightness }}"
+              set_light_color_temp: "{{ trigger.to_state.attributes.color_temp }}"
           - service: light.turn_on
             data:
               entity_id: "{{linked_lights | reject('eq', trigger.entity_id) | list }}"
               brightness: "{{ set_light_brightness }}"
+              color_temp: "{{ set_light_color_temp }}"
           - delay:
               milliseconds: !input delay_miliseconds
       - conditions:
