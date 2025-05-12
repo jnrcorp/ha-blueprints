@@ -33,6 +33,8 @@ blueprint:
       description: Lights whose state and attributes will be linked (if any of them transitions to ON state, all will be ON. Same for the OFF, BRIGHTNESS, COLOR_TEMP, and SPEED states).
       selector:
         entity:
+          filter:
+            domain: light
           multiple: true
     delay_miliseconds:
       name: Delay
