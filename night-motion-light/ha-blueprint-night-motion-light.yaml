@@ -16,10 +16,9 @@ blueprint:
       name: Light
       description: Light(s) to turn on when motion is detected
       selector:
-        device:
+        target:
           entity:
-            domain: light
-          multiple: true
+            - domain: light
     no_motion_wait:
       name: Wait time
       description: Time to leave the light on after last motion is detected.
