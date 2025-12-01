@@ -28,6 +28,40 @@ blueprint:
           min: 0
           max: 3600
           unit_of_measurement: seconds
+    start_choice:
+      name: Start Boundary
+      description: Choose whether the active window starts at sunset or at a specific time.
+      default: sunset
+      selector:
+        select:
+          options:
+            - value: sunset
+              label: Sunset
+            - value: time
+              label: Specific time
+    start_time:
+      name: Optional Start Time
+      description: Explicit start time used when Start Boundary is set to "Specific time".
+      default: ""
+      selector:
+        time: {}
+    end_choice:
+      name: End Boundary
+      description: Choose whether the active window ends at sunrise or at a specific time.
+      default: sunrise
+      selector:
+        select:
+          options:
+            - value: sunrise
+              label: Sunrise
+            - value: time
+              label: Specific time
+    end_time:
+      name: Optional End Time
+      description: Explicit end time used when End Boundary is set to "Specific time".
+      default: ""
+      selector:
+        time: {}
 
 # If motion is detected within the delay,
 # we restart the script.
@@ -40,10 +74,65 @@ trigger:
   from: "off"
   to: "on"
 
+variables:
+  start_choice: !input start_choice
+  end_choice: !input end_choice
+  start_time: !input start_time
+  end_time: !input end_time
+
 conditions:
-  - condition: sun
-    before: sunrise
-    after: sunset
+  - condition: template
+    value_template: >-
+      {% set now_ts = as_timestamp(now()) %}
+
+      {# compute start timestamp #}
+      {% if start_choice == 'sunset' %}
+        {% set ns = state_attr('sun.sun', 'next_setting') %}
+        {% if ns %}
+          {% set start_ts = as_timestamp(ns) - 86400 %}
+        {% else %}
+          {% set start_ts = 0 %}
+        {% endif %}
+      {% else %}
+        {% if start_time != '' %}
+          {% set t = strptime(start_time, '%H:%M:%S') %}
+          {% set sd = now().replace(hour=t.hour, minute=t.minute, second=t.second, microsecond=0) %}
+          {% set start_ts = as_timestamp(sd) %}
+          {% if start_ts > now_ts %}
+            {% set start_ts = start_ts - 86400 %}
+          {% endif %}
+        {% else %}
+          {% set start_ts = 0 %}
+        {% endif %}
+      {% endif %}
+
+      {# compute end timestamp #}
+      {% if end_choice == 'sunrise' %}
+        {% set nr = state_attr('sun.sun', 'next_rising') %}
+        {% if nr %}
+          {% set end_ts = as_timestamp(nr) %}
+        {% else %}
+          {% set end_ts = 0 %}
+        {% endif %}
+      {% else %}
+        {% if end_time != '' %}
+          {% set t2 = strptime(end_time, '%H:%M:%S') %}
+          {% set ed = now().replace(hour=t2.hour, minute=t2.minute, second=t2.second, microsecond=0) %}
+          {% set end_ts = as_timestamp(ed) %}
+          {% if end_ts <= now_ts %}
+            {% set end_ts = end_ts + 86400 %}
+          {% endif %}
+        {% else %}
+          {% set end_ts = 0 %}
+        {% endif %}
+      {% endif %}
+
+      {# if either boundary is missing, fail the condition #}
+      {% if start_ts == 0 or end_ts == 0 %}
+        false
+      {% else %}
+        {{ (now_ts >= start_ts) and (now_ts < end_ts) }}
+      {% endif %}
 
 action:
   - alias: "Turn on the light"
