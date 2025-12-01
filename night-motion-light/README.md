@@ -5,6 +5,9 @@
 This blueprint allows you to easily create/maintain an automation that turns on a set of lights at night (from sunset to sunrise) when motion is detected.
 
 **CHANGELOG:**
+  - **1.1**: (2025-12-01)
+    - Added support to switch between sunset and a specified time
+    - Added support to switch between sunrise and a specified time 
   - **1.0**: (2025-11-07)
     - First official release - ported from homeassistant's implementation
 

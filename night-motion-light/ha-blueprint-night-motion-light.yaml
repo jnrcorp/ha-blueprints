@@ -1,6 +1,6 @@
 blueprint:
   name: Night Motion-activated Light
-  description: Turn on a light when motion is detected at night (between sunset and sunrise)
+  description: Turn on a light when motion is detected at night (between sunset or specified time and sunrise or specified time)
   domain: automation
   source_url: https://github.com/jnrcorp/ha-blueprints/blob/main/night-motion-light/ha-blueprint-night-motion-light.yaml
   author: Joshua Ross
