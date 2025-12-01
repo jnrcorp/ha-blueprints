@@ -74,13 +74,19 @@ trigger:
   from: "off"
   to: "on"
 
+variables:
+  bp_start_choice: !input start_choice
+  bp_end_choice: !input end_choice
+  bp_start_time: !input start_time
+  bp_end_time: !input end_time
+
 conditions:
   - condition: template
     value_template: >-
       {% set now_ts = as_timestamp(now()) %}
 
       {# compute start timestamp #}
-      {% if input.start_choice == 'sunset' %}
+      {% if bp_start_choice == 'sunset' %}
         {% set ns = state_attr('sun.sun', 'next_setting') %}
         {% if ns %}
           {% set start_ts = as_timestamp(ns) - 86400 %}
@@ -88,8 +94,8 @@ conditions:
           {% set start_ts = 0 %}
         {% endif %}
       {% else %}
-        {% if input.start_time != '' %}
-          {% set t = strptime(input.start_time, '%H:%M:%S') %}
+        {% if bp_start_time != '' %}
+          {% set t = strptime(bp_start_time, '%H:%M:%S') %}
           {% set sd = now().replace(hour=t.hour, minute=t.minute, second=t.second, microsecond=0) %}
           {% set start_ts = as_timestamp(sd) %}
           {% if start_ts > now_ts %}
@@ -101,7 +107,7 @@ conditions:
       {% endif %}
 
       {# compute end timestamp #}
-      {% if input.end_choice == 'sunrise' %}
+      {% if bp_end_choice == 'sunrise' %}
         {% set nr = state_attr('sun.sun', 'next_rising') %}
         {% if nr %}
           {% set end_ts = as_timestamp(nr) %}
@@ -109,8 +115,8 @@ conditions:
           {% set end_ts = 0 %}
         {% endif %}
       {% else %}
-        {% if input.end_time != '' %}
-          {% set t2 = strptime(input.end_time, '%H:%M:%S') %}
+        {% if bp_end_time != '' %}
+          {% set t2 = strptime(bp_end_time, '%H:%M:%S') %}
           {% set ed = now().replace(hour=t2.hour, minute=t2.minute, second=t2.second, microsecond=0) %}
           {% set end_ts = as_timestamp(ed) %}
           {% if end_ts <= now_ts %}
