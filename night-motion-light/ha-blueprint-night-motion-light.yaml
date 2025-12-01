@@ -83,55 +83,39 @@ variables:
 conditions:
   - condition: template
     value_template: >-
-      {% set now_ts = as_timestamp(now()) %}
+      {% set now_time = now().time() %}
 
-      {# compute start timestamp #}
-      {% if start_choice == 'sunset' %}
-        {% set ns = state_attr('sun.sun', 'next_setting') %}
-        {% if ns %}
-          {% set start_ts = as_timestamp(ns) - 86400 %}
-        {% else %}
-          {% set start_ts = 0 %}
-        {% endif %}
+      {# compute start time #}
+      {% if start_choice == 'time' %}
+        {% set start = strptime(start_time, '%H:%M:%S').time() if start_time else none %}
       {% else %}
-        {% if start_time != '' %}
-          {% set t = strptime(start_time, '%H:%M:%S') %}
-          {% set sd = now().replace(hour=t.hour, minute=t.minute, second=t.second, microsecond=0) %}
-          {% set start_ts = as_timestamp(sd) %}
-          {% if start_ts > now_ts %}
-            {% set start_ts = start_ts - 86400 %}
-          {% endif %}
+        {# sunset logic: get last sunset's time #}
+        {% set sunset = state_attr('sun.sun', 'next_setting') | as_datetime | as_local %}
+        {% if sunset > now() %}
+          {% set start = (sunset - timedelta(days=1)).time() %}
         {% else %}
-          {% set start_ts = 0 %}
+          {% set start = sunset.time() %}
         {% endif %}
       {% endif %}
 
-      {# compute end timestamp #}
-      {% if end_choice == 'sunrise' %}
-        {% set nr = state_attr('sun.sun', 'next_rising') %}
-        {% if nr %}
-          {% set end_ts = as_timestamp(nr) %}
-        {% else %}
-          {% set end_ts = 0 %}
-        {% endif %}
+      {# compute end time #}
+      {% if end_choice == 'time' %}
+        {% set end = strptime(end_time, '%H:%M:%S').time() if end_time else none %}
       {% else %}
-        {% if end_time != '' %}
-          {% set t2 = strptime(end_time, '%H:%M:%S') %}
-          {% set ed = now().replace(hour=t2.hour, minute=t2.minute, second=t2.second, microsecond=0) %}
-          {% set end_ts = as_timestamp(ed) %}
-          {% if end_ts <= now_ts %}
-            {% set end_ts = end_ts + 86400 %}
-          {% endif %}
-        {% else %}
-          {% set end_ts = 0 %}
-        {% endif %}
+        {# sunrise logic: get next sunrise's time #}
+        {% set end = (state_attr('sun.sun', 'next_rising') | as_datetime | as_local).time() %}
       {% endif %}
 
       {# if either boundary is missing, fail the condition #}
-      {% if start_ts == 0 or end_ts == 0 %}
+      {% if start is none or end is none %}
         false
       {% else %}
-        {{ (now_ts >= start_ts) and (now_ts < end_ts) }}
+        {# check if current time is in the range, handling overnight ranges #}
+        {% if start < end %}
+          {{ start <= now_time < end }}
+        {% else %}
+          {{ now_time >= start or now_time < end }}
+        {% endif %}
       {% endif %}
 
 action:
